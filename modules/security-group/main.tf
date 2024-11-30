@@ -1,12 +1,3 @@
-terraform {
-  required_providers {
-    ansible = {
-      source  = "ansible/ansible"
-      version = ">= 1.3.0"
-    }
-  }
-}
-
 resource "aws_security_group" "kubedm_sg" {
     name = var.security_group_name
 
@@ -19,7 +10,7 @@ resource "aws_security_group" "kubedm_sg" {
       ipv6_cidr_blocks = []
       prefix_list_ids  = []
       security_groups  = []
-      self             = true  //set to true means allow traffic from itself
+      self             = true  
       description      = "Allow all outbound traffic"
     }
   ]

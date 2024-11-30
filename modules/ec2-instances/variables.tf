@@ -3,11 +3,6 @@ variable "ami" {
     description = "Ubuntu OS ami id"
 }
 
-variable "key_pair" {
-    type = string
-    description = "key_pair same for all instances"
-}
-
 variable "security_group" {
     type = string
     description = "allowing all traffic from each other"
@@ -51,5 +46,14 @@ variable "ec2_tags" {
     Owner = "Sarang!!"
     Environment = "dev"
   }
+}
+
+variable "key_name" {
+    type = string
+}
+
+variable "ansible_config_path" {
+    type = string
+    default = "."
 }
 

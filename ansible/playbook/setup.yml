@@ -80,17 +80,32 @@
         state: latest
         update_cache: true
 
-    - name: Install containerd.io
-      ansible.builtin.apt:
-        pkg:
-          - containerd.io
+    - name: Setting up the containerd runtime configurations
+      block:
+        - name: Making sure the unarchive directory exists 
+          ansible.builtin.file: 
+            path: "/opt/cni/bin/"
+            state: directory
 
-    - name: Enable containerd
-      ansible.builtin.systemd:
-        name: containerd
-        daemon_reload: yes
-        state: started
-        enabled: yes
+        - name: Install the CNI plugin latest version
+          ansible.builtin.apt:
+            name: cni-plugins
+            state: latest 
+          
+        - name: Make the directory
+          ansible.builtin.file:
+            path: /etc/containerd
+            state: directory
+  
+        - name: Generate CNI configurations
+          ansible.builtin.shell: "containerd config default > /etc/containerd/config.toml"
+          
+        - name: Change the systemd driver of containerd
+          ansible.builtin.replace:
+            path: /etc/containerd/config.toml
+            regexp: 'SystemdCgroup = false'
+            replace: 'SystemdCgroup = true'
+  
 
     - name: Restart service cron, in all cases, also issue daemon-reload to pick up config changes
       ansible.builtin.systemd:
@@ -115,8 +130,38 @@
           - kubelet
           - kubeadm
           - kubectl
+    
+    - name: Check if the service is unmasked
+      ansible.builtin.shell: "systemctl is-enabled containerd"
+      register: "masked_containerd"
+      changed_when: false
 
-    - name: hold kubectl,kubeadm,kubelet packages
+    - name: Unmask the containerd, if masked 
+      ansible.builtin.shell: "systemctl unmask containerd"
+      when: masked_containerd.stdout == 'masked' 
+
+    - name: Check if the kubelet is unmasked
+      ansible.builtin.shell: "systemctl is-enabled kubelet"
+      register: "kubelet_status"
+      changed_when: false
+
+    - name: Mask it if unmasked
+      ansible.builtin.shell: "systemctl mask kubelet"
+      when: kubelet_status.stdout == "masked"
+
+    - name: Stop the kubelet service for avoiding the further conflicts when the kubedm init starts it
+      ansible.builtin.service: 
+        name: kubelet
+        state: stopped
+        enabled: true
+      
+    - name: Making sure the contained service is started
+      ansible.builtin.service: 
+        name: containerd
+        state: started
+        enabled: true 
+
+    - name: Holding the kubectl,kubeadm,kubelet packages to make sure they further dont get updated by the apt  
       ansible.builtin.shell: apt-mark hold kubelet kubectl kubeadm
 
     - name: Label the node
@@ -128,7 +173,13 @@
   become: true
   tasks:
     - name: init kubeadm
-      ansible.builtin.shell: sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --control-plane-endpoint "{{ansible_host}}:6443"
+      ansible.builtin.shell: kubeadm init --pod-network-cidr=10.244.0.0/16 --control-plane-endpoint "{{ansible_host}}:6443"
+      register: kubeadm_init_result
+      ignore_errors: true
+
+    - name: Debugging if the kubedm cluster is started
+      ansible.builtin.debug:
+        msg: "{{ kubeadm_init_result }}"
 
     - name: create ~/.kube directory
       ansible.builtin.file:
@@ -137,12 +188,12 @@
         mode: "0755"
 
     - name: copy kubeconfig file
-      shell: sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+      shell: cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 
     - name: set the correct permission on kubeconfig file
-      shell: sudo chown $(id -u):$(id -g) $HOME/.kube/config
+      shell: chown $(id -u):$(id -g) $HOME/.kube/config
 
-    - name: install calico for pod networking   #using calico for managing pod networking - this enables to assign pod IP addr and route through the network securely
+    - name: Install calico for pod networking  
       ansible.builtin.shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
 
     - name: Copy kubeconfig file locally
@@ -151,9 +202,10 @@
         dest: /tmp/kubeconfig/
         flat: yes
 
-    - name: Generate join token for worker nodes  # joining will perform the tls bootstraping - meaning they will install tls crets and use them dynamically 
-      ansible.builtin.shell: sudo kubeadm token create --print-join-command  # it will generate the token for joining and we need to copy it to worker nodes
+    - name: Generate join token for worker nodes   
+      ansible.builtin.shell: kubeadm token create --print-join-command  
       register: join_node_token 
+      failed_when: join_node_token.stdout == ""
 
     - name: Save join command as variable
       ansible.builtin.set_fact:
@@ -167,7 +219,7 @@
   become: true
   tasks:
     - name: add worker nodes to cluster
-      shell: "sudo {{ hostvars['control_plane'].join_node }}"  #here we perform joining of worker nodes to master node
+      shell: "sudo {{ hostvars['control_plane'].join_node }}"  
       when: hostvars['control_plane'].join_node is defined
 
     - name: Label the worker node
