@@ -87,10 +87,12 @@
             path: "/opt/cni/bin/"
             state: directory
 
-        - name: Install the CNI plugin latest version
-          ansible.builtin.apt:
-            name: cni-plugins
-            state: latest 
+        - name: Install the CNI plugin latest version via shell command
+          ansible.builtin.shell: |
+            curl -sSL https://github.com/containernetworking/plugins/releases/download/v1.1.0/cni-plugins-linux-amd64-v1.1.0.tgz | tar -C /opt/cni/bin/ -xz
+          args:
+            creates: /opt/cni/bin/cni
+
           
         - name: Make the directory
           ansible.builtin.file:
@@ -164,12 +166,8 @@
     - name: Holding the kubectl,kubeadm,kubelet packages to make sure they further dont get updated by the apt  
       ansible.builtin.shell: apt-mark hold kubelet kubectl kubeadm
 
-    - name: Label the node
-      shell: "kubectl label node {{ inventory_hostname }} node-role.kubernetes.io/worker=worker"
-      when: "'master' not in group_names"
-
 - name: Setup Control Plane Node
-  hosts: master
+  hosts: control_plane
   become: true
   tasks:
     - name: init kubeadm

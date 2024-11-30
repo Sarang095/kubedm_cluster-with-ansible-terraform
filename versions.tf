@@ -1,8 +1,9 @@
 terraform {
   backend "s3" {
-    key    = "terraform/backend"
-    bucket = "my-kops-state-bucket-ccc50"
-    region = "us-east-1"
+    key     = "terraform/backend"
+    bucket  = "my-kops-state-bucket-ccc50"
+    encrypt = true
+    region  = "us-east-1"
   }
 
   required_providers {
