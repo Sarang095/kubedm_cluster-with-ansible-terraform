@@ -4,8 +4,8 @@ resource "ansible_host" "master" {
     name = "master_node"
      variables = {
     ansible_host                 = aws_instance.master_node.public_ip
-    ansible_user                 = "ubuntu",
-    ansible_ssh_private_key_file = local_file.ssh_private_key.filename,
+    ansible_user                 = "ubuntu"
+    ansible_ssh_private_key_file = local_file.ssh_private_key.filename
     prefix                       = var.ec2_tags.Owner
   }
 }
@@ -16,8 +16,8 @@ resource "ansible_host" "worker_node_1" {
     name = "worker_node_1"
      variables = {
     ansible_host                 = aws_instance.worker_node-1.public_ip
-    ansible_user                 = "ubuntu",
-    ansible_ssh_private_key_file = local_file.ssh_private_key.filename,
+    ansible_user                 = "ubuntu"
+    ansible_ssh_private_key_file = local_file.ssh_private_key.filename
     prefix                       = var.ec2_tags.Owner
   }
 }
@@ -28,8 +28,8 @@ resource "ansible_host" "worker_node_2" {
     name = "worker_node_2"
      variables = {
     ansible_host                 = aws_instance.worker_node-2.public_ip
-    ansible_user                 = "ubuntu",
-    ansible_ssh_private_key_file = "~/.ssh/terrakey",
+    ansible_user                 = "ubuntu"
+    ansible_ssh_private_key_file = local_file.ssh_private_key.filename
     prefix                       = var.ec2_tags.Owner
   }
 }
