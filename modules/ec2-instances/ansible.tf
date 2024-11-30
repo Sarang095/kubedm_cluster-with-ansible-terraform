@@ -1,6 +1,6 @@
 resource "ansible_host" "master" {
     depends_on = [ aws_instance.master_node ]
-    groups = ["ansible_client"]
+    groups = ["control_plane"]
     name = "master_node"
      variables = {
     ansible_host                 = aws_instance.master_node.public_ip
@@ -12,7 +12,7 @@ resource "ansible_host" "master" {
 
 resource "ansible_host" "worker_node_1" {
     depends_on = [ var.worker_node_1, var.worker_node_2 ]
-    groups = ["ansible_client"]
+    groups = ["workers"]
     name = "worker_node_1"
      variables = {
     ansible_host                 = aws_instance.worker_node-1.public_ip
@@ -24,7 +24,7 @@ resource "ansible_host" "worker_node_1" {
 
 resource "ansible_host" "worker_node_2" {
     depends_on = [ var.worker_node_1, var.worker_node_2 ]
-    groups = ["ansible_client"]
+    groups = ["workers"]
     name = "worker_node_2"
      variables = {
     ansible_host                 = aws_instance.worker_node-2.public_ip
