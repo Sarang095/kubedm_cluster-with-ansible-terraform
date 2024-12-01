@@ -185,11 +185,30 @@
         state: directory
         mode: "0755"
 
-    - name: copy kubeconfig file
-      shell: cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+    - name: Ensure the .kube directory exists
+      file:
+        path: "{{ ansible_env.HOME }}/.kube"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0755'
 
-    - name: set the correct permission on kubeconfig file
-      shell: chown $(id -u):$(id -g) $HOME/.kube/config
+    - name: Copy kubeconfig file only if it differs
+      ansible.builtin.copy:
+        src: /etc/kubernetes/admin.conf
+        dest: "{{ ansible_env.HOME }}/.kube/config"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
+        remote_src: yes
+        force: no  
+
+    - name: Set the correct permission on kubeconfig file
+      file:
+        path: "{{ ansible_env.HOME }}/.kube/config"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
 
     - name: Install calico for pod networking  
       ansible.builtin.shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
@@ -209,16 +228,20 @@
       ansible.builtin.set_fact:
         join_node: "{{ join_node_token.stdout_lines[0] }}"
 
-    - name: Label the master node
-      shell: "kubectl label node {{ inventory_hostname }} node-role.kubernetes.io/master=master"  
+    - name: Label the worker nodes
+      command: kubectl label node {{ hostvars[inventory_hostname]['k8s_node_name'] | replace('.', '-') }} node-role.kubernetes.io/worker=worker
 
 - name: Setup Worker Nodes
   hosts: workers
   become: true
   tasks:
-    - name: add worker nodes to cluster
-      shell: "sudo {{ hostvars['control_plane'].join_node }}"  
-      when: hostvars['control_plane'].join_node is defined
+    - name: Debug - Show join command from control plane
+      debug:
+        msg: "The kubeadm join command is: {{ hostvars['master_node'].join_node }}"
 
-    - name: Label the worker node
-      shell: "kubectl label node {{ inventory_hostname }} node-role.kubernetes.io/worker=worker"
+    - name: Add worker nodes to cluster
+      shell: "{{ hostvars['master_node'].join_node }}"  
+      when: hostvars['master_node'].join_node is defined
+
+
+
