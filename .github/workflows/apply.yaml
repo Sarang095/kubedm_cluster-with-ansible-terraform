@@ -38,5 +38,10 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve
 
-      - name: Terraform destroy
-        run: terraform destroy -auto-approve
+      - name: Run The Playbook
+        run: |
+          ansible-playbook -i ../ansible/inventory.yml ../ansible/playbooks/cluster_init.yml 
+
+      - name: Upload Kubeconfig to AWS Secrets Manager for secure Access
+        run: |
+          aws secretsmanager put-secret-value --secret-id ${{ secrets.AWS_KUBECONFIG_SECRET }} --secret-binary fileb:///tmp/kubeconfig/config || aws secretsmanager create-secret --name ${{ secrets.AWS_KUBECONFIG_SECRET }} --secret-binary fileb:///tmp/kubeconfig/config
