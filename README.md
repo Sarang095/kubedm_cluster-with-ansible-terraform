@@ -1,5 +1,4 @@
-# IaC and GitOps Pipeline for Kubernetes Cluster Deployment on Amazon EC2  
-**April 2024**  
+# IaC and GitOps Pipeline for Kubernetes Cluster Deployment on Amazon EC2   
 
 ## Overview
 
