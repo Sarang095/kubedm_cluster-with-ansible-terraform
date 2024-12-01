@@ -1,3 +1,4 @@
+![324418709-87dc04e4-2bc4-4448-b176-2a776869015e](https://github.com/user-attachments/assets/fc053313-a1a5-481d-9ec5-b4b754baca2d)
 # IaC and GitOps Pipeline for Kubernetes Cluster Deployment on Amazon EC2   
 
 ## Overview
