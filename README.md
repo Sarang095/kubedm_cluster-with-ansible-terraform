@@ -33,3 +33,11 @@ This project automates the provisioning and configuration of **Kubernetes cluste
 - **Security First**: Emphasis on secure, keyless authentication, and secure storage of sensitive data.
 - **Modular and Customizable**: The pipeline is designed to be flexible, supporting different configurations through parameterized `.tfvars` files.
 - **Efficient Collaboration**: Remote state management allows seamless collaboration in teams working with Terraform.
+
+## Project Snapshots
+![Screenshot from 2024-12-01 18-18-50](https://github.com/user-attachments/assets/d290897b-09aa-47b3-8cc9-1c4c382b0004)
+![Screenshot from 2024-12-01 00-08-42](https://github.com/user-attachments/assets/00528b6c-bde2-4d25-b601-8c7d30518599)
+![Screenshot from 2024-12-01 12-10-12(1)](https://github.com/user-attachments/assets/04f14130-0b42-4840-94aa-95211ff9515b)
+![Screenshot from 2024-12-01 16-16-19](https://github.com/user-attachments/assets/4079b186-dee3-48e2-8ad4-a7bb11f8eb58)
+![Screenshot from 2024-12-01 16-16-03](https://github.com/user-attachments/assets/758931ab-bd8c-4569-a8c7-87a740003b99)
+
