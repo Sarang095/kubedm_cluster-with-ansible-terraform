@@ -1,22 +1,35 @@
-Kubernetes Cluster Setup with Kubeadm
+# IaC and GitOps Pipeline for Kubernetes Cluster Deployment on Amazon EC2  
+**April 2024**  
 
-This project sets up a Kubernetes cluster with one master and two worker nodes using a combination of Terraform, Ansible, and GitHub Actions. The infrastructure is modularized for better reusability, maintainability, and abstraction.
-Project Overview
+## Overview
 
-This project contains the following components:
+This project automates the provisioning and configuration of **Kubernetes clusters** using **Kubeadm** on **Amazon EC2**. It integrates **Terraform** for infrastructure provisioning, **Ansible** for configuration management, and **GitHub Actions** for CI/CD workflows, delivering a robust GitOps pipeline for secure and scalable deployments.
 
-- Terraform
-  Used for spinning up the required server infrastructure on AWS.
+## Key Features
 
-- Ansible Provider Plugin
-  Dynamically creates the inventory and necessary parameters for Ansible to configure the Kubernetes nodes.
+- **Infrastructure Provisioning**:  
+  Utilizes **Terraform** to provision scalable infrastructure on **Amazon EC2**.
 
-- Ansible
-  Manages the configuration of the master and worker nodes in the Kubernetes cluster.
+- **Configuration Management**:  
+  Uses **Ansible** for automated configuration, ensuring a consistent environment across the cluster.
 
-- GitHub Actions
-  Automates the running of Terraform modules.
-  Accesses AWS Secrets using Keyless Authentication via OpenID Connect (OIDC) running over OAuth2.0.
+- **CI/CD Integration**:  
+  The pipeline is integrated with **GitHub Actions** for seamless continuous deployment. **GitHub OIDC Provider** is used for **keyless AWS authentication**, enhancing security by eliminating the need for long-lived credentials.
 
-- Modularization
-  The project is modularized using three modules to ensure reusability, maintainability, and abstraction.
+- **Security**:  
+  - Implements the **Principle of Least Privilege** to restrict access permissions and protect sensitive operations.
+  - Secures sensitive data, such as cluster credentials, by utilizing **encrypted storage** and robust **key management systems** for data confidentiality and integrity.
+
+- **Remote State Management**:  
+  Uses **AWS S3** for remote **Terraform state management**, ensuring state consistency and collaboration across teams.
+
+- **Modular Architecture**:  
+  - Terraform configurations are modularized with reusable modules and parameterized via `.tfvars` files, enabling customizable deployments.
+  - Leverages **Terraform Ansible Providers** to dynamically generate and maintain inventory files, ensuring synchronization between infrastructure and configuration layers.
+
+## Benefits
+
+- **Scalable Deployments**: Rapid, repeatable Kubernetes cluster deployments with minimal manual intervention.  
+- **Security First**: Emphasis on secure, keyless authentication, and secure storage of sensitive data.
+- **Modular and Customizable**: The pipeline is designed to be flexible, supporting different configurations through parameterized `.tfvars` files.
+- **Efficient Collaboration**: Remote state management allows seamless collaboration in teams working with Terraform.
